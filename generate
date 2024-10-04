@@ -43,6 +43,7 @@ case $1 in
   pnpm create t3-app@latest
   pnpm dlx shadcn@latest init -d
   pnpm dlx shadcn@latest add *
+  ;;
 *)
   echo "Unsuported project type."
   ;;
