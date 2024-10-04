@@ -52,12 +52,40 @@ echo "export PATH="$PATH:$HOME/bin/starters"" >> ~/.zshrc
 source ~/.zshrc
 ```
 
-NOTES:
+### NOTES:
 
-- For T3 projects
-  - Ensure you have `pnpm` installed
-- For Java projects
-  - Ensure you have `gradle` intalled
+- For `T3` projects, ensure you have `pnpm` installed
+
+You can install pnpm with the following command:
+
+```sh
+curl -fsSL https://get.pnpm.io/install.sh | sh -
+```
+
+- For `Java` projects, ensure you have `gradle` intalled
+
+You will need to download the JDK and SKDMAN! to manage gradle version.
+
+To download the JDK, run the following command:
+
+```sh
+sudo apt update
+sudo apt install openjdk-21-jdk
+```
+
+To download SDKMAN!, run the following command:
+
+```sh
+curl -s "https://get.sdkman.io" | bash
+```
+
+You can then use it to install gradle by running:
+
+```sh
+sdk install gradle 8.2.1
+sdk use gradle 8.2.1
+```
+
 - For C/C++
   - Ensure you have `gcc` and/or `g++` installed. You can change this to the compiler of your choice after installing in the `Makefile`
   - Ensure you Have `make` installed
