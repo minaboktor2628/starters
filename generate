@@ -1,0 +1,49 @@
+#!/bin/bash
+
+cpp_or_c() {
+  if [[ -n "$1" ]]; then
+    NEW_PROJECT_NAME=$1
+  else
+    read -p "Enter project name: " NEW_PROJECT_NAME
+  fi
+
+  SRC_DIR="$(cd "$(dirname "$0")" && pwd)/starters/c++"
+  DEST_DIR="${NEW_PROJECT_NAME}"
+
+  if [ -d "$DEST_DIR" ]; then
+    echo "Error: Directory ${NEW_PROJECT_NAME} already exists!"
+    exit 1
+  fi
+
+  cp -r "$SRC_DIR" "$DEST_DIR"
+  cd "$DEST_DIR" || exit
+
+  sed -i "s/^TARGET ?=.*/TARGET ?= ${NEW_PROJECT_NAME}/" Makefile
+  sed -i "s/executable/${NEW_PROJECT_NAME}/g" README.md
+}
+
+gradle_project() {
+  if ! command -v gradle &>/dev/null; then
+    echo "Error: Gradle is not installed. Please install it before proceeding."
+    exit 1
+  fi
+
+  # If Gradle is installed, initialize the project
+  gradle init
+}
+
+case $1 in
+"java")
+  gradle_project
+  ;;
+"c++" | "c" | "cpp")
+  cpp_or_c $2
+  ;;
+"t3")
+  pnpm create t3-app@latest
+  pnpm dlx shadcn@latest init -d
+  pnpm dlx shadcn@latest add *
+*)
+  echo "Unsuported project type."
+  ;;
+esac
