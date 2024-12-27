@@ -36,8 +36,8 @@ C_FILES = $(wildcard $(SRC)/*.c)
 CPP_FILES = $(wildcard $(SRC)/*.cpp)
 
 # Object files for c and cpp
-C_OBJ_FILES = $(patsubst $(SRC)/%.c, $(BUILD)/%.o, $(SRC_FILES))
-CPP_OBJ_FILES = $(patsubst $(SRC)/%.cpp, $(BUILD)/%.o, $(SRC_FILES))
+C_OBJ_FILES = $(patsubst $(SRC)/%.c, $(BUILD)/%.o, $(C_FILES))
+CPP_OBJ_FILES = $(patsubst $(SRC)/%.cpp, $(BUILD)/%.o, $(CPP_FILES))
 
 # All object files
 OBJ_FILES = $(C_OBJ_FILES) $(CPP_OBJ_FILES)
