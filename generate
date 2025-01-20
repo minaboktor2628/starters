@@ -7,7 +7,7 @@ cpp_or_c() {
     read -p "Enter project name: " NEW_PROJECT_NAME
   fi
 
-  SRC_DIR="$(cd "$(dirname "$0")" && pwd)/starters/c++"
+  SRC_DIR="$(cd "$(dirname "$0")" && pwd)/starters/$2"
   DEST_DIR="${NEW_PROJECT_NAME}"
 
   if [ -d "$DEST_DIR" ]; then
@@ -36,8 +36,11 @@ case $1 in
 "java")
   gradle_project
   ;;
-"c++" | "c" | "cpp")
-  cpp_or_c $2
+"c++" | "cpp")
+  cpp_or_c $2 c++
+  ;;
+"c")
+  cpp_or_c $2 c
   ;;
 "t3")
   pnpm create t3-app@latest

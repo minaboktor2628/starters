@@ -1,7 +1,7 @@
 # Mina Boktor
 
 # Default c and cpp comilers
-CC = gcc
+CPP = gcc
 
 # Include any libraries you would like to link here
 # ex: -lpthread -lm
@@ -31,10 +31,10 @@ ifeq ($(DEBUG), 1)
 endif
 
 # Collect c and cpp source files
-C_FILES = $(wildcard $(SRC)/*.c)
+CPP_FILES = $(wildcard $(SRC)/*.c)
 
 # Object files for c and cpp
-OBJ_FILES = $(patsubst $(SRC)/%.c, $(BUILD)/%.o, $(C_FILES))
+OBJ_FILES = $(patsubst $(SRC)/%.c, $(BUILD)/%.o, $(CPP_FILES))
 
 # This tells make that these targets aren't real targets
 .PHONY: all clean clean-obj
@@ -46,12 +46,12 @@ all: $(TARGET)
 
 # Link all object files to create final target
 $(TARGET): $(OBJ_FILES)
-	$(CC) $(FLAGS) $^ -o $@ $(LIB)
+	$(CPP) $(FLAGS) $^ -o $@ $(LIB)
 
-# Rule for compiling c files
+# Rule for compiling cpp files
 $(BUILD)/%.o: $(SRC)/%.c
 	@mkdir -p $(BUILD)
-	$(CC) $(FLAGS) -c $< -o $@ 
+	$(CPP) $(FLAGS) -c $< -o $@ 
 
 # Clean artifacts and executable
 # Use this by running 'make clean'
@@ -64,3 +64,4 @@ clean:
 clean-obj:
 	rm -rf $(BUILD)
 	@echo "Object files removed"
+
