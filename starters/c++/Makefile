@@ -24,12 +24,6 @@ INCLUDE = include
 # Compiler flags. All warningings by default
 FLAGS = -I$(INCLUDE) -Wall
 
-# Add 'DEBUG=1' or 'DEBUG' to make command if you would like add -g to compiler flags
-# ex, run the following command in your terminal:'make DEBUG'
-ifeq ($(DEBUG), 1)
-	FLAGS += -g
-endif
-
 # Collect c and cpp source files
 CPP_FILES = $(wildcard $(SRC)/*.cpp)
 
@@ -52,6 +46,9 @@ $(TARGET): $(OBJ_FILES)
 $(BUILD)/%.o: $(SRC)/%.cpp
 	@mkdir -p $(BUILD)
 	$(CPP) $(FLAGS) -c $< -o $@ 
+
+debug: FLAGS += -g
+debug: clean all
 
 # Clean artifacts and executable
 # Use this by running 'make clean'

@@ -20,6 +20,7 @@ cpp_or_c() {
 
   sed -i "s/^TARGET ?=.*/TARGET ?= ${NEW_PROJECT_NAME}/" Makefile
   sed -i "s/executable/${NEW_PROJECT_NAME}/g" README.md
+  sed -i "s/<executable>/${NEW_PROJECT_NAME}/g" .vscode/launch.json
 }
 
 gradle_project() {
