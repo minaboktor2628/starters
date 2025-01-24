@@ -1,7 +1,8 @@
 # Mina Boktor
 
 # Default c and cpp comilers
-CPP = gcc
+COMPILER = gcc
+EXTENTION = c
 
 # Include any libraries you would like to link here
 # ex: -lpthread -lm
@@ -24,17 +25,11 @@ INCLUDE = include
 # Compiler flags. All warningings by default
 FLAGS = -I$(INCLUDE) -Wall
 
-# Add 'DEBUG=1' or 'DEBUG' to make command if you would like add -g to compiler flags
-# ex, run the following command in your terminal:'make DEBUG'
-ifeq ($(DEBUG), 1)
-	FLAGS += -g
-endif
-
 # Collect c and cpp source files
-CPP_FILES = $(wildcard $(SRC)/*.c)
+CPP_FILES = $(wildcard $(SRC)/*.$(EXTENTION))
 
 # Object files for c and cpp
-OBJ_FILES = $(patsubst $(SRC)/%.c, $(BUILD)/%.o, $(CPP_FILES))
+OBJ_FILES = $(patsubst $(SRC)/%.$(EXTENTION), $(BUILD)/%.o, $(CPP_FILES))
 
 # This tells make that these targets aren't real targets
 .PHONY: all clean clean-obj
@@ -46,12 +41,15 @@ all: $(TARGET)
 
 # Link all object files to create final target
 $(TARGET): $(OBJ_FILES)
-	$(CPP) $(FLAGS) $^ -o $@ $(LIB)
+	$(COMPILER) $(FLAGS) $^ -o $@ $(LIB)
 
 # Rule for compiling cpp files
-$(BUILD)/%.o: $(SRC)/%.c
+$(BUILD)/%.o: $(SRC)/%.$(EXTENTION)
 	@mkdir -p $(BUILD)
-	$(CPP) $(FLAGS) -c $< -o $@ 
+	$(COMPILER) $(FLAGS) -c $< -o $@ 
+
+debug: FLAGS += -g
+debug: clean all
 
 # Clean artifacts and executable
 # Use this by running 'make clean'
