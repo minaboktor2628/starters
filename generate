@@ -7,7 +7,7 @@ cpp_or_c() {
     read -p "Enter project name: " NEW_PROJECT_NAME
   fi
 
-  SRC_DIR="$(cd "$(dirname "$0")" && pwd)/starters/$2"
+  SRC_DIR="$(cd "$(dirname "$0")" && pwd)/starters/c_based"
   DEST_DIR="${NEW_PROJECT_NAME}"
 
   if [ -d "$DEST_DIR" ]; then
@@ -18,8 +18,17 @@ cpp_or_c() {
   cp -r "$SRC_DIR" "$DEST_DIR"
   cd "$DEST_DIR" || exit
 
-  sed -i "s/^TARGET ?=.*/TARGET ?= ${NEW_PROJECT_NAME}/" Makefile
-  sed -i "s/executable/${NEW_PROJECT_NAME}/g" README.md
+  if [[ $2 == 'cpp' ]]; then
+    mv src/main.c src/main.cpp
+    sed -i "s/C_FLAGS  /CXX_FLAGS/g" Makefile
+    sed -i "s/(CC)/(CXX)/g" Makefile
+    echo "  Compiler: g++" >>.clangd
+  else
+    echo "  Compiler: gcc" >>.clangd
+  fi
+  sed -i "s/<executable>/${NEW_PROJECT_NAME}/g" Makefile
+  sed -i "s/EXT :=/EXT := $2/g" Makefile
+  sed -i "s/<executable>/${NEW_PROJECT_NAME}/g" README.md
   sed -i "s/<executable>/${NEW_PROJECT_NAME}/g" .vscode/launch.json
 }
 
@@ -38,7 +47,7 @@ case $1 in
   gradle_project
   ;;
 "c++" | "cpp")
-  cpp_or_c $2 c++
+  cpp_or_c $2 cpp
   ;;
 "c")
   cpp_or_c $2 c

@@ -19,6 +19,9 @@ SRC = src
 # Remember to change .gitignore if you change this value
 BUILD = build
 
+# Where to store all object file articats for different build types
+DEBUG_BUILD= $(BUILD)/debug
+
 # Where you are storing all your header files
 INCLUDE = include
 
@@ -32,7 +35,7 @@ CPP_FILES = $(wildcard $(SRC)/*.$(EXTENTION))
 OBJ_FILES = $(patsubst $(SRC)/%.$(EXTENTION), $(BUILD)/%.o, $(CPP_FILES))
 
 # This tells make that these targets aren't real targets
-.PHONY: all clean clean-obj
+.PHONY: all
 
 # Compile all source files
 # Use this by running 'make all', or just 'make' for short 
@@ -48,9 +51,10 @@ $(BUILD)/%.o: $(SRC)/%.$(EXTENTION)
 	@mkdir -p $(BUILD)
 	$(COMPILER) $(FLAGS) -c $< -o $@ 
 
-debug: FLAGS += -g
+debug: FLAGS += -g -DDEBUG
 debug: clean all
 
+.PHONY: clean
 # Clean artifacts and executable
 # Use this by running 'make clean'
 clean:
