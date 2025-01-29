@@ -6,22 +6,26 @@ C_FLAGS         := -Wall -Wextra
 DEBUG_FLAGS     := -g -DDEBUG
 RELEASE_FLAGS   := -DNDEBUG
 DIST_FLAGS      := -O3 -DNDEBUG
-PRE_FLAGS       :=
-# PRE_FLAGS := -MMD -MP
+PRE_FLAGS       := -MMD -MP
+
+# File extention
+EXT :=
 
 # Project directory structure
 BIN := bin
 SRC := src
 LIB := lib
 INC := include
-# MAINFILE := $(SRC)/main.cpp
+MAINFILE := $(SRC)/main.$(EXT)
 
-# Formater command
-FORMATER := clang-format
-FORMAT_FILES := $(shell find $(INC) $(SRC) -type f \( -name "*.c" -o -name "*.h" -o -name "*.cpp" -o -name "*.hpp" \))
+# Formatter and Linter
+CLANG_FORMAT := clang-format
+CLANG_TIDY   := clang-tidy
 
-# File extention
-EXT :=
+# Find all C++ source and header files
+FORMAT_FILES := $(shell find $(SRC) $(INC) -type f \( -name "*.cpp" -o -name "*.hpp" -o -name "*.h" -o -name "*.c" \))
+LINT_FILES   := $(FORMAT_FILES)
+
 
 # Build directories and output
 PROGRAM := <executable>
@@ -72,7 +76,7 @@ release:
 
 dist:
 	@$(MAKE) build MODE=dist
-	strip $(TARGET)
+	strip $(TARGET) || true
 
 # Main task
 $(TARGET): $(OBJS)
@@ -86,25 +90,31 @@ $(BUILD_DIR)/%.o: $(SRC)/%.$(EXT)
 	$(CC) $(C_FLAGS) $(MODE_FLAGS) $(PRE_FLAGS) $(INC_FLAGS) -c -o $@ $< $(LDPATHS) $(LDFLAGS)
 
 # Format task
-.PHONY: format
-format:
-	$(FORMATER) -i $(FORMAT_FILES)
-
+# .PHONY: format
+# format:
+# 	$(FORMATER) -i $(FORMAT_FILES)
+#
 # Bear task
 .PHONY: bear
 bear:
 	bear -- $(MAKE) build
 
-CLEAN_COMMON := compile_commands.json core *.dSYM
-
-.PHONY: lint
-lint:
-	clang-tidy $(FORMAT_FILES)
-
 # Package bin
 .PHONY: package
 package: dist
-	tar -czvf $(BIN)/dist/$(PROGRAM)-$(VERSION).tar.gz -C $(BIN)/dist main
+	tar -czvf $(BIN)/dist/$(PROGRAM)-$(VERSION).tar.gz -C $(BIN)/dist $(PROGRAM)
+
+.PHONY: format
+format:
+	@echo "Formatting source and header files..."
+	$(CLANG_FORMAT) -i $(FORMAT_FILES)
+
+.PHONY: lint
+lint:
+	@echo "Running lint checks on source and header files..."
+	$(CLANG_TIDY) $(LINT_FILES) -- $(C_FLAGS) $(MODE_FLAGS) $(INC_FLAGS)
+
+CLEAN_COMMON := compile_commands.json *.dSYM
 
 # Clean task
 .PHONY: clean
@@ -131,7 +141,7 @@ help:
 	@echo " "
 	@echo "Example usage:"
 	@echo "  make build MODE=dist"
-	@echo "  make run ARGS="arg1 arg1 ...""
+	@echo "  make run ARGS=\"arg1 arg1 ...\""
 
 #@echo "  make test        - Run tests"
 

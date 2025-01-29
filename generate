@@ -20,7 +20,7 @@ cpp_or_c() {
 
   if [[ $2 == 'cpp' ]]; then
     mv src/main.c src/main.cpp
-    sed -i "s/C_FLAGS  /CXX_FLAGS/g" Makefile
+    sed -i "s/C_FLAGS/CXX_FLAGS/g" Makefile
     sed -i "s/(CC)/(CXX)/g" Makefile
     echo "  Compiler: g++" >>.clangd
   else
