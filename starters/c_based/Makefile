@@ -2,6 +2,7 @@
 VERSION := 1.0.0
 
 ## Compiler and flags
+CC              := gcc
 C_FLAGS         := -Wall -Wextra
 DEBUG_FLAGS     := -g -DDEBUG
 RELEASE_FLAGS   := -DNDEBUG
@@ -26,7 +27,6 @@ CLANG_TIDY   := clang-tidy
 FORMAT_FILES := $(shell find $(SRC) $(INC) -type f \( -name "*.cpp" -o -name "*.hpp" -o -name "*.h" -o -name "*.c" \))
 LINT_FILES   := $(FORMAT_FILES)
 
-
 # Build directories and output
 PROGRAM := <executable>
 BUILD   := build
@@ -34,17 +34,17 @@ BUILD   := build
 # Modes
 MODE := release
 ifeq ($(MODE), debug)
-    BUILD_DIR  := $(BUILD)/debug
+    BUILD_DIR  := $(BUILD)/$(MODE)
     MODE_FLAGS := $(DEBUG_FLAGS)
-    TARGET     := $(BIN)/debug/$(PROGRAM)
+    TARGET     := $(BIN)/$(MODE)/$(PROGRAM)
 else ifeq ($(MODE), release)
-    BUILD_DIR  := $(BUILD)/release
+    BUILD_DIR  := $(BUILD)/$(MODE)
     MODE_FLAGS := $(RELEASE_FLAGS)
-    TARGET     := $(BIN)/release/$(PROGRAM)
+    TARGET     := $(BIN)/$(MODE)/$(PROGRAM)
 else ifeq ($(MODE), dist)
-    BUILD_DIR  := $(BUILD)/dist
+    BUILD_DIR  := $(BUILD)/$(MODE)
     MODE_FLAGS := $(DIST_FLAGS)
-    TARGET     := $(BIN)/dist/$(PROGRAM)
+    TARGET     := $(BIN)/$(MODE)/$(PROGRAM)
 endif
 
 # Library search directories and flags
@@ -60,6 +60,9 @@ INC_FLAGS := $(addprefix -I,$(INC_DIRS))
 SRCS := $(shell find $(SRC) -name *.$(EXT))
 OBJS := $(subst $(SRC)/,$(BUILD_DIR)/,$(addsuffix .o,$(basename $(SRCS))))
 DEPS := $(OBJS:.o=.d)
+
+# All
+all: release debug
 
 # Run task
 run: $(TARGET)
@@ -80,20 +83,18 @@ dist:
 
 # Main task
 $(TARGET): $(OBJS)
-	@echo "Building $(MODE) mode..."
 	mkdir -p $(dir $@)
-	$(CC) $(OBJS) -o $@ $(LDPATHS) $(LDFLAGS)
+	$(CC) $(C_FLAGS) $(MODE_FLAGS) $(OBJS) -o $@ $(LDPATHS) $(LDFLAGS)
 
 # Compile all cpp files
 $(BUILD_DIR)/%.o: $(SRC)/%.$(EXT)
 	mkdir -p $(dir $@)
 	$(CC) $(C_FLAGS) $(MODE_FLAGS) $(PRE_FLAGS) $(INC_FLAGS) -c -o $@ $< $(LDPATHS) $(LDFLAGS)
 
-# Format task
-# .PHONY: format
-# format:
-# 	$(FORMATER) -i $(FORMAT_FILES)
-#
+# Compile db
+db:
+	compiledb make build
+
 # Bear task
 .PHONY: bear
 bear:
@@ -106,12 +107,10 @@ package: dist
 
 .PHONY: format
 format:
-	@echo "Formatting source and header files..."
 	$(CLANG_FORMAT) -i $(FORMAT_FILES)
 
 .PHONY: lint
 lint:
-	@echo "Running lint checks on source and header files..."
 	$(CLANG_TIDY) $(LINT_FILES) -- $(C_FLAGS) $(MODE_FLAGS) $(INC_FLAGS)
 
 CLEAN_COMMON := compile_commands.json *.dSYM
@@ -119,12 +118,10 @@ CLEAN_COMMON := compile_commands.json *.dSYM
 # Clean task
 .PHONY: clean
 clean:
-	@echo "Clearing $(MODE) mode..."
 	$(RM) -r $(BUILD)/$(MODE) $(BIN)/$(MODE) $(CLEAN_COMMON)
 
 # Clean all modes
 clean_all:
-	@echo "Clearing all builds..."
 	$(RM) -r $(BUILD) $(BIN) $(CLEAN_COMMON)
 
 help:
