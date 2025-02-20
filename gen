@@ -1,0 +1,109 @@
+#!/bin/bash
+
+VERSION="1.0.0"
+
+# Default values
+LANGUAGE=""
+TYPE="basic"
+PROJECT_NAME=""
+GIT_INIT=false
+DEST_DIR="."
+
+# Level types
+TYPES=("simple" "basic" "complex")
+
+# Legal languages
+LANGUAGES=("c" "cpp")
+
+# Function to display usage
+usage() {
+  echo "Usage: $0 -l [c|cpp] -n <project_name> [-t simple|basic|complex] [-d <destination>] [-g] [-h] [-v]"
+  echo "  -l    Specify language (${LANGUAGES[@]})"
+  echo "  -n    Specify project name"
+  echo "  -t    (Optional) Specify template type (${TYPES[@]}). Default: basic"
+  echo "  -d    (Optional) Specify destination directory. Default: current directory (./)"
+  echo "  -g    (Optional) Initialize Git repository after setup"
+  echo "  -h    Show help"
+  echo "  -v    Print version"
+}
+
+cpp_or_c() {
+  SRC_DIR="$(cd "$(dirname "$0")" && pwd)/starters/c_cpp/${TYPE}"
+
+  if [ -d "$DEST_DIR/$PROJECT_NAME" ]; then
+    echo "Error: Directory ${PROJECT_NAME} already exists!"
+    exit 1
+  fi
+
+  cp -r "$SRC_DIR" "$DEST_DIR/$PROJECT_NAME"
+  cd "$DEST_DIR/$PROJECT_NAME" || exit
+
+  if [[ $1 == 'cpp' ]]; then
+    mv src/main.c src/main.cpp
+    sed -i "s/C_FLAGS/CXX_FLAGS/g" Makefile
+    sed -i "s/(CC)/(CXX)/g" Makefile
+    sed -i "s/CC := gcc/CXX := g++/g" Makefile
+    sed -i "s/EXT := c/EXT := cpp/g" Makefile
+  fi
+
+  sed -i "s/<executable>/${PROJECT_NAME}/g" Makefile
+  sed -i "s/<executable>/${PROJECT_NAME}/g" README.md
+  sed -i "s/<executable>/${PROJECT_NAME}/g" .vscode/launch.json
+}
+
+is_in_array() {
+  local element="$1"
+  shift
+  local array=("$@")
+
+  for item in "${array[@]}"; do
+    if [[ "$item" == "$element" ]]; then
+      return 0
+    fi
+  done
+  return 1
+}
+
+# Parse arguments using getopts
+while getopts ":l:n:t:d:ghv" opt; do
+  case ${opt} in
+  l) LANGUAGE="$OPTARG" ;;
+  n) PROJECT_NAME="$OPTARG" ;;
+  t) TYPE="$OPTARG" ;;
+  d) DEST_DIR="$OPTARG" ;;
+  g) GIT_INIT=true ;;
+  v) echo "$0 version: ${VERSION}" && exit 0 ;;
+  h) usage && exit 0 ;;
+  :) echo "Option -${OPTARG} requires an argument." && exit 1 ;;
+  ?) echo "Invalid option: -${OPTARG}." && exit 1 ;;
+  *) usage && exit 1 ;;
+  esac
+done
+
+# Validate required arguments
+if [[ -z "$LANGUAGE" || -z "$PROJECT_NAME" ]]; then
+  echo "Error: Language and project name are required."
+  usage
+  exit 1
+fi
+
+if ! is_in_array "$LANGUAGE" "${LANGUAGES[@]}"; then
+  echo "Error: '$LANGUAGE' is not a valid language!"
+  usage
+  exit 1
+fi
+
+if ! is_in_array "$TYPE" "${TYPES[@]}"; then
+  echo "Error: '$TYPE' is not a valid type!"
+  usage
+  exit 1
+fi
+
+case $LANGUAGE in
+c) cpp_or_c "c" ;;
+cpp) cpp_or_c "cpp" ;;
+esac
+
+if $GIT_INIT; then
+  git init
+fi

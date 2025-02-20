@@ -13,7 +13,6 @@ PRE_FLAGS := -MMD -MP
 # compile_commands.json generator. (bear, compiledb, etc) for better lsp support
 COMP_DB_GENERATOR := compiledb
 
-
 # File extention
 EXT := c
 

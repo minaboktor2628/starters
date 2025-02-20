@@ -24,7 +24,7 @@ cpp_or_c() {
     sed -i "s/(CC)/(CXX)/g" Makefile
     # echo "  Compiler: g++" >>.clangd
     sed -i "s/CC              := gcc/CC              := g++/g" Makefile
-  else
+    # else
     # echo "  Compiler: gcc" >>.clangd
   fi
   sed -i "s/<executable>/${NEW_PROJECT_NAME}/g" Makefile
