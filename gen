@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION="1.0.0"
+VERSION="1.1.0"
 
 # Default values
 LANGUAGE=""
@@ -8,6 +8,7 @@ TYPE="basic"
 PROJECT_NAME=""
 GIT_INIT=false
 DEST_DIR="."
+EXECUTABLE=""
 
 # Level types
 TYPES=("simple" "basic" "complex")
@@ -17,12 +18,13 @@ LANGUAGES=("c" "cpp")
 
 # Function to display usage
 usage() {
-  echo "Usage: $0 -l [c|cpp] -n <project_name> [-t simple|basic|complex] [-d <destination>] [-g] [-h] [-v]"
+  echo "Usage: $0 -l [c|cpp] -n <project_name> [-t simple|basic|complex] [-d <destination>] [-e <executable name>] [-g] [-h] [-v]"
   echo "  -l    Specify language (${LANGUAGES[@]})"
-  echo "  -n    Specify project name"
+  echo "  -n    Specify project name/folder name"
   echo "  -t    (Optional) Specify template type (${TYPES[@]}). Default: basic"
   echo "  -d    (Optional) Specify destination directory. Default: current directory (./)"
   echo "  -g    (Optional) Initialize Git repository after setup"
+  echo "  -e    (Optional) Name of executable. Defualt: project name"
   echo "  -h    Show help"
   echo "  -v    Print version"
 }
@@ -46,9 +48,7 @@ cpp_or_c() {
     sed -i "s/EXT := c/EXT := cpp/g" Makefile
   fi
 
-  sed -i "s/<executable>/${PROJECT_NAME}/g" Makefile
-  sed -i "s/<executable>/${PROJECT_NAME}/g" README.md
-  sed -i "s/<executable>/${PROJECT_NAME}/g" .vscode/launch.json
+  sed -i "s/<executable>/${EXECUTABLE}/g" Makefile README.md .vscode/launch.json
 }
 
 is_in_array() {
@@ -65,13 +65,14 @@ is_in_array() {
 }
 
 # Parse arguments using getopts
-while getopts ":l:n:t:d:ghv" opt; do
+while getopts ":l:n:t:d:e:ghv" opt; do
   case ${opt} in
   l) LANGUAGE="$OPTARG" ;;
   n) PROJECT_NAME="$OPTARG" ;;
   t) TYPE="$OPTARG" ;;
   d) DEST_DIR="$OPTARG" ;;
   g) GIT_INIT=true ;;
+  e) EXECUTABLE="$OPTARG" ;;
   v) echo "$0 version: ${VERSION}" && exit 0 ;;
   h) usage && exit 0 ;;
   :) echo "Option -${OPTARG} requires an argument." && exit 1 ;;
@@ -97,6 +98,12 @@ if ! is_in_array "$TYPE" "${TYPES[@]}"; then
   echo "Error: '$TYPE' is not a valid type!"
   usage
   exit 1
+fi
+
+# If user didnt pass in an executable name, set the executable name
+# to the project name
+if [[ -z "$EXECUTABLE" ]]; then
+  EXECUTABLE=$PROJECT_NAME
 fi
 
 case $LANGUAGE in
